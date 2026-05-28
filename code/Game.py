@@ -12,7 +12,6 @@ class Game:
         pygame.init()
         self.window = pygame.display.set_mode(size=(WIN_WIDTH, WIN_HEIGHT))
 
-
     def run(self):
         while True:
             menu = Menu(self.window)
@@ -22,7 +21,7 @@ class Game:
                 level = Level(self.window, 'Level1', menu_return)
                 level_return = level.run()
             elif menu_return == MENU_OPTION[2]:
-                pygame.quit()  #close window
-                quit()  #close pygame
+                pygame.quit()  # close window
+                quit()  # close pygame
             elif menu_return == MENU_OPTION[1]:
                 pass

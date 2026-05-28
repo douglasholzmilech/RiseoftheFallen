@@ -13,13 +13,7 @@ class Entity(ABC):
         self.name = name
 
         # carrega imagem
-        self.surf = pygame.image.load('./asset/' + name + '.png')
-
-        # redimensiona
-        self.surf = pygame.transform.scale(
-            self.surf,
-            (WIN_WIDTH, WIN_HEIGHT)
-        )
+        self.surf = pygame.image.load('./asset/' + name + '.png').convert_alpha()
 
         self.rect = self.surf.get_rect(
             left=position[0],
