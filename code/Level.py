@@ -6,6 +6,7 @@ import sys
 import pygame
 from pygame import Surface, Rect
 from pygame.font import Font
+from code.Database import Database
 
 from Const import COLOR_WHITE, WIN_HEIGHT, EVENT_ENEMY
 from code.Entity import Entity
@@ -17,6 +18,7 @@ class Level:
         self.timeout = 60000
         self.window = window
         self.name = name
+        self.score = 0
         self.game_mode = game_mode
         self.entity_list: list[Entity] = []
         self.entity_list.extend(EntityFactory.get_entity('Level1bg'))
@@ -110,8 +112,22 @@ class Level:
                     new_entity_list.append(ent)
 
                 # mantém inimigos vivos
-                elif hasattr(ent, 'health') and ent.health > 0:
-                    new_entity_list.append(ent)
+                elif hasattr(ent, 'health'):
+
+                    if ent.health > 0:
+
+                        new_entity_list.append(ent)
+
+                    else:
+
+                        if ent.name == 'Lizard':
+                            self.score += 10
+
+                        elif ent.name == 'Medusa':
+                            self.score += 20
+
+                        elif ent.name == 'Demon':
+                            self.score += 30
 
             self.entity_list = new_entity_list
 
@@ -153,8 +169,19 @@ class Level:
                     pygame.display.flip()
 
                     pygame.time.delay(3000)
+                    conn = Database.connect()
 
+                    cursor = conn.cursor()
+
+                    cursor.execute(
+                        "INSERT INTO score(points) VALUES(?)",
+                        (self.score,)
+                    )
+
+                    conn.commit()
+                    conn.close()
                     return
+
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -166,8 +193,33 @@ class Level:
 
             self.level_text(14, f'{self.name} - Timeout: {self.timeout / 1000:.1f}s', COLOR_WHITE, (10, 5))
             self.level_text(14, f'fps: {clock.get_fps():.0f}', COLOR_WHITE, (10, WIN_HEIGHT - 35))
+            pygame.draw.rect(
+                self.window,
+                (0, 0, 0),
+                (640, 15, 160, 30)
+            )
+
+            self.level_text(
+                20,
+                f'Score: {self.score}',
+                COLOR_WHITE,
+                (650, 20)
+            )
+
+            self.level_text(
+                14,
+                f'{self.name} - Timeout: {self.timeout / 1000:.1f}s',
+                COLOR_WHITE,
+                (10, 5)
+            )
+
+            self.level_text(
+                14,
+                f'fps: {clock.get_fps():.0f}',
+                COLOR_WHITE,
+                (10, WIN_HEIGHT - 35)
+            )
             pygame.display.flip()
-        pass
 
     def level_text(self, text_size: int, text: str, text_color: tuple, text_pos: tuple):
         text_font: Font = pygame.font.SysFont(name="Lucida Sans Typewriter", size=text_size)
