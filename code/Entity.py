@@ -13,7 +13,10 @@ class Entity(ABC):
         self.name = name
 
         # carrega imagem
-        self.surf = pygame.image.load('./asset/' + name + '.png').convert_alpha()
+        try:
+            self.surf = pygame.image.load('./asset/' + name + '.png').convert_alpha()
+        except:
+            self.surf = pygame.Surface((1, 1), pygame.SRCALPHA)
 
         self.rect = self.surf.get_rect(
             left=position[0],

@@ -9,23 +9,75 @@ from code.Entity import Entity
 class Enemy(Entity):
     def __init__(self, name, position):
         super().__init__(name, position)
-        if name == 'Lizard':
-            self.surf = pygame.transform.scale(self.surf, (200, 200))
 
-        elif name == 'Medusa':
-            self.surf = pygame.transform.scale(self.surf, (100, 100))
+        # LISTA DE FRAMES
+        self.frames = []
 
-        elif name == 'Demon':
-            self.surf = pygame.transform.scale(self.surf, (200, 200))
+        # QUANTIDADE DE FRAMES
+        frame_count = {
+            'Demon': 6,
+            'Lizard': 6,
+            'Medusa': 4
+        }
 
-        self.surf = pygame.transform.flip(self.surf, True, False)
+        # TAMANHO DOS INIMIGOS
+        size = {
+            'Demon': (100, 100),
+            'Lizard': (100, 100),
+            'Medusa': (100, 100)
+        }
+
+        # CARREGA FRAMES
+        for i in range(1, frame_count[name] + 1):
+
+            # nomes dos arquivos
+            # Demon.walk1.png
+            # Lizard.walk1.png
+            # Medusa.walk1.png
+
+            img = pygame.image.load(
+                f'./asset/{name}.walk{i}.png'
+            ).convert_alpha()
+
+            img = pygame.transform.scale(img, size[name])
+
+            # vira para esquerda
+            img = pygame.transform.flip(img, True, False)
+
+            self.frames.append(img)
+
+        # frame inicial
+        self.current_frame = 0
+        self.animation_counter = 0
+        self.animation_speed = 0.15
+
+        self.surf = self.frames[self.current_frame]
 
         self.rect = self.surf.get_rect(
             left=position[0],
             top=position[1]
         )
+        # VIDA
+        self.max_health = 30
+        self.health = 30
 
-    def move(self, ):
+    def animate(self):
+        self.animation_counter += self.animation_speed
+
+        if self.animation_counter >= len(self.frames):
+            self.animation_counter = 0
+
+        self.current_frame = int(self.animation_counter)
+
+        self.surf = self.frames[self.current_frame]
+
+    def move(self):
+        # movimenta
         self.rect.centerx -= ENTITY_SPEED[self.name]
+
+        # anima
+        self.animate()
+
+        # reaparece
         if self.rect.right <= 0:
             self.rect.left = WIN_WIDTH

@@ -32,6 +32,68 @@ class Level:
             for ent in self.entity_list:
                 self.window.blit(source=ent.surf, dest=ent.rect)
                 ent.move()
+            player = None
+
+            for entity in self.entity_list:
+                if entity.name == 'Player':
+                    player = entity
+                    break
+
+            # player atacando
+            if player and player.attack:
+
+                attack_rect = player.get_attack_rect()
+
+                for entity in self.entity_list:
+
+                    for entity in self.entity_list:
+
+                        # somente entidades com vida
+                        if hasattr(entity, 'health'):
+
+                            # evita bater no player
+                            if entity.name != 'Player':
+
+                                # colisão
+                                if attack_rect.colliderect(entity.rect):
+
+                                    # ATTACK 1
+                                    if player.attack_type == 1:
+                                        damage = 10
+
+                                    # ATTACK 2
+                                    elif player.attack_type == 2:
+                                        damage = 20
+
+                                    else:
+                                        damage = 0
+
+                                    entity.health -= damage
+
+            # REMOVE INIMIGOS MORTOS
+            new_entity_list = []
+
+            for ent in self.entity_list:
+
+                # mantém player
+                if ent.name == 'Player':
+                    new_entity_list.append(ent)
+
+                # mantém backgrounds
+                elif 'Level1bg' in ent.name:
+                    new_entity_list.append(ent)
+
+                # mantém inimigos vivos
+                elif hasattr(ent, 'health') and ent.health > 0:
+                    new_entity_list.append(ent)
+
+            self.entity_list = new_entity_list
+
+
+            # DESENHA BARRA DE VIDA DO PLAYER
+            for ent in self.entity_list:
+                if ent.name == 'Player':
+                    ent.draw_health_bar(self.window)
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
