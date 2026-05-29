@@ -29,9 +29,35 @@ class Level:
         clock = pygame.time.Clock()
         while True:
             clock.tick(60)
+            player = None
+
             for ent in self.entity_list:
+                if ent.name == 'Player':
+                    player = ent
+                    break
+
+            for ent in self.entity_list:
+
                 self.window.blit(source=ent.surf, dest=ent.rect)
-                ent.move()
+
+                if ent.name in ('Lizard', 'Medusa', 'Demon'):
+                    ent.move(player)
+                else:
+                    ent.move()
+
+            for ent in self.entity_list:
+
+                if ent.name in ('Lizard', 'Medusa', 'Demon'):
+
+                    if ent.attack_finished:
+
+                        ent.attack_finished = False
+
+                        if ent.rect.colliderect(player.rect):
+
+                            if not player.defending:
+                                player.health -= ent.damage
+
             player = None
 
             for entity in self.entity_list:
@@ -94,6 +120,41 @@ class Level:
             for ent in self.entity_list:
                 if ent.name == 'Player':
                     ent.draw_health_bar(self.window)
+
+            for ent in self.entity_list:
+
+                if ent.name == 'Player' and ent.health <= 0:
+
+                    ent.dead = True
+
+                    while not ent.dead_animation_finished:
+
+                        clock.tick(60)
+
+                        self.window.fill((0, 0, 0))
+
+                        for obj in self.entity_list:
+
+                            if obj.name == 'Player':
+                                obj.animate_death()
+
+                            self.window.blit(obj.surf, obj.rect)
+
+                        pygame.display.flip()
+
+                    font = pygame.font.SysFont("Arial", 80, bold=True)
+
+                    text = font.render("GAME OVER", True, (255, 0, 0))
+
+                    rect = text.get_rect(center=(400, 300))
+
+                    self.window.blit(text, rect)
+
+                    pygame.display.flip()
+
+                    pygame.time.delay(3000)
+
+                    return
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

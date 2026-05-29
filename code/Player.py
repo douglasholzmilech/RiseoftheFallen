@@ -13,6 +13,23 @@ class Player(Entity):
         super().__init__(name, position)
 
         self.speed = 3
+        self.defending = False
+
+        self.dead_frames = []
+
+        for i in range(1, 7):
+            img = pygame.image.load(
+                f'./asset/P1dead{i}.png'
+            ).convert_alpha()
+
+            img = pygame.transform.scale(img, (100, 100))
+
+            self.dead_frames.append(img)
+
+        self.dead = False
+        self.dead_animation_finished = False
+        self.dead_counter = 0
+        self.dead_speed = 0.15
 
         # VIDA
         self.max_health = 100
@@ -155,6 +172,9 @@ class Player(Entity):
     # =====================================
 
     def move(self):
+        if self.dead:
+            self.animate_death()
+            return
 
         pressed_key = pygame.key.get_pressed()
 
@@ -165,11 +185,13 @@ class Player(Entity):
             self.attack_cooldown -= 1
 
         # =====================================
+        # =====================================
         # DEFESA
         # =====================================
 
         if pressed_key[pygame.K_KP0]:
 
+            self.defending = True
             self.state = 'defend'
 
             image = self.defend_frame
@@ -180,6 +202,9 @@ class Player(Entity):
             self.surf = image
 
             return
+
+        else:
+            self.defending = False
 
         # =====================================
         # =====================================
@@ -292,3 +317,18 @@ class Player(Entity):
             (20, 20, 200, 20),
             2
         )
+
+    def animate_death(self):
+
+        if self.dead_animation_finished:
+            return
+
+        self.dead_counter += self.dead_speed
+
+        frame = int(self.dead_counter)
+
+        if frame >= len(self.dead_frames):
+            frame = len(self.dead_frames) - 1
+            self.dead_animation_finished = True
+
+        self.surf = self.dead_frames[frame]

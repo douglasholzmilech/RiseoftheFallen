@@ -45,6 +45,41 @@ class Enemy(Entity):
             img = pygame.transform.flip(img, True, False)
 
             self.frames.append(img)
+        # FRAMES DE ATAQUE
+        self.attack_frames = []
+
+        attack_count = {
+            'Lizard': 5,
+            'Medusa': 6,
+            'Demon': 4
+        }
+
+        for i in range(1, attack_count[name] + 1):
+            img = pygame.image.load(
+                f'./asset/{name}.attack{i}.png'
+            ).convert_alpha()
+
+            img = pygame.transform.scale(img, size[name])
+
+            img = pygame.transform.flip(img, True, False)
+
+            self.attack_frames.append(img)
+
+        # CONTROLE DE ATAQUE
+        self.attacking = False
+        self.attack_counter = 0
+        self.attack_speed = 0.20
+        self.attack_finished = False
+
+        # DANO
+        self.damage = {
+            'Lizard': 5,
+            'Medusa': 8,
+            'Demon': 10
+        }[name]
+
+        self.attack_range = 70
+        self.attack_cooldown = 0
 
         # frame inicial
         self.current_frame = 0
@@ -71,13 +106,51 @@ class Enemy(Entity):
 
         self.surf = self.frames[self.current_frame]
 
-    def move(self):
-        # movimenta
-        self.rect.centerx -= ENTITY_SPEED[self.name]
+    def move(self, player=None):
 
-        # anima
-        self.animate()
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
 
-        # reaparece
+        if player:
+
+            distance = abs(player.rect.centerx - self.rect.centerx)
+
+            # PERTO = ATACA
+            if distance <= self.attack_range:
+
+                self.attacking = True
+
+            # LONGE = SEGUE PLAYER
+            elif not self.attacking:
+
+                direction = pygame.math.Vector2(
+                    player.rect.centerx - self.rect.centerx,
+                    player.rect.centery - self.rect.centery
+                )
+
+                if direction.length() > 0:
+                    direction = direction.normalize()
+
+                    self.rect.centerx += direction.x * ENTITY_SPEED[self.name]
+                    self.rect.centery += direction.y * ENTITY_SPEED[self.name]
+
+        if self.attacking:
+            self.animate_attack()
+        else:
+            self.animate()
+
         if self.rect.right <= 0:
             self.rect.left = WIN_WIDTH
+
+    def animate_attack(self):
+
+        self.attack_counter += self.attack_speed
+
+        if self.attack_counter >= len(self.attack_frames):
+            self.attack_counter = 0
+            self.attacking = False
+            self.attack_finished = True
+
+        frame = int(self.attack_counter)
+
+        self.surf = self.attack_frames[frame]
