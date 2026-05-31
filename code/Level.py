@@ -1,13 +1,9 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 import random
 import sys
-
 import pygame
 from pygame import Surface, Rect
 from pygame.font import Font
 from code.Database import Database
-
 from Const import COLOR_WHITE, WIN_HEIGHT, EVENT_ENEMY
 from code.Entity import Entity
 from code.EntityFactory import EntityFactory
@@ -19,6 +15,7 @@ class Level:
         self.window = window
         self.name = name
         self.score = 0
+        self.attack_hit = False
         self.phase = 1
         self.game_mode = game_mode
         self.entity_list: list[Entity] = []
@@ -37,238 +34,176 @@ class Level:
                 self.timeout = 0
             if self.phase == 1 and self.timeout <= 0:
                 self.phase = 2
-
                 self.name = 'Level2'
-
                 pygame.mixer_music.stop()
                 pygame.mixer_music.load('./asset/mapa2.wav')
                 pygame.mixer_music.play(-1)
-
                 self.timeout = 5000
-                # mantém apenas player
                 self.entity_list = [
                     ent for ent in self.entity_list
                     if ent.name == 'Player'
                 ]
-
-                # adiciona backgrounds da fase 2
                 self.entity_list = (
                         EntityFactory.get_entity('Level2bg')
                         + self.entity_list
                 )
             if self.phase == 2 and self.timeout <= 0:
                 self.phase = 3
-
                 self.name = 'Level3'
-
                 pygame.mixer_music.stop()
                 pygame.mixer_music.load('./asset/mapa3.wav')
                 pygame.mixer_music.play(-1)
-
                 self.timeout = 5000
-
                 self.entity_list = [
                     ent for ent in self.entity_list
                     if ent.name == 'Player'
                 ]
-
                 self.entity_list = (
                         EntityFactory.get_entity('Level3bg')
                         + self.entity_list
                 )
-
                 pygame.time.set_timer(EVENT_ENEMY, 750)
             if self.phase == 3 and self.timeout <= 0:
                 self.phase = 4
-
                 self.name = 'Level4'
-
                 pygame.mixer_music.stop()
                 pygame.mixer_music.load('./asset/mapa4.wav')
                 pygame.mixer_music.play(-1)
-
-                self.timeout = 60000
-
-                # mantém apenas player
+                self.timeout = -1
                 self.entity_list = [
                     ent for ent in self.entity_list
                     if ent.name == 'Player'
                 ]
-
-                # adiciona backgrounds da fase 4
                 self.entity_list = (
                         EntityFactory.get_entity('Level4bg')
                         + self.entity_list
                 )
-
-                # desativa spawn de inimigos
                 pygame.time.set_timer(EVENT_ENEMY, 0)
                 self.entity_list.append(
                     EntityFactory.get_entity('Boss')
                 )
             player = None
-
             for ent in self.entity_list:
                 if ent.name == 'Player':
                     player = ent
                     break
-
             for ent in self.entity_list:
-
                 self.window.blit(source=ent.surf, dest=ent.rect)
-
                 if ent.name in ('Lizard', 'Medusa', 'Demon'):
                     ent.move(player)
+                elif ent.name == 'Boss':
+                    ent.move()
                 else:
                     ent.move()
-
             for ent in self.entity_list:
-
                 if ent.name in ('Lizard', 'Medusa', 'Demon'):
-
                     if ent.attack_finished:
-
                         ent.attack_finished = False
-
                         if ent.rect.colliderect(player.rect):
-
                             if not player.defending:
                                 player.health -= ent.damage
-
+            for ent in self.entity_list:
+                if ent.name == 'Boss':
+                    if ent.attack_finished:
+                        ent.attack_finished = False
+                        if ent.rect.colliderect(player.rect):
+                            if not player.defending:
+                                player.health -= ent.damage
             player = None
-
             for entity in self.entity_list:
                 if entity.name == 'Player':
                     player = entity
                     break
-
-            # player atacando
-            if player and player.attack:
-
+            if player and player.attack and not player.attack_hit:
                 attack_rect = player.get_attack_rect()
-
                 for entity in self.entity_list:
-
-                    for entity in self.entity_list:
-
-                        # somente entidades com vida
-                        if hasattr(entity, 'health'):
-
-                            # evita bater no player
-                            if entity.name != 'Player':
-
-                                # colisão
-                                if attack_rect.colliderect(entity.rect):
-
-                                    # ATTACK 1
-                                    if player.attack_type == 1:
-                                        damage = 10
-
-                                    # ATTACK 2
-                                    elif player.attack_type == 2:
-                                        damage = 20
-
-                                    else:
-                                        damage = 0
-
-                                    entity.health -= damage
-
-            # REMOVE INIMIGOS MORTOS
+                    if hasattr(entity, 'health'):
+                        if entity.name != 'Player':
+                            if attack_rect.colliderect(entity.rect):
+                                if player.attack_type == 1:
+                                    damage = 10
+                                elif player.attack_type == 2:
+                                    damage = 20
+                                else:
+                                    damage = 0
+                                entity.health -= damage
+                                player.attack_hit = True
             new_entity_list = []
-
             for ent in self.entity_list:
-
-                # mantém player
                 if ent.name == 'Player':
                     new_entity_list.append(ent)
-
-                # mantém backgrounds
                 elif 'bg' in ent.name:
                     new_entity_list.append(ent)
-
-                # mantém inimigos vivos
                 elif hasattr(ent, 'health'):
-
+                    if ent.name == 'Boss' and ent.health <= 0:
+                        font = pygame.font.SysFont(
+                            "Arial",
+                            80,
+                            bold=True
+                        )
+                        text = font.render(
+                            "YOU WIN",
+                            True,
+                            (0, 255, 0)
+                        )
+                        rect = text.get_rect(
+                            center=(400, 300)
+                        )
+                        self.window.blit(text, rect)
+                        pygame.display.flip()
+                        pygame.time.delay(5000)
+                        return
                     if ent.health > 0:
-
                         new_entity_list.append(ent)
-
                     else:
-
                         if ent.name == 'Lizard':
                             self.score += 10
-
                         elif ent.name == 'Medusa':
                             self.score += 20
-
                         elif ent.name == 'Demon':
                             self.score += 30
-
             self.entity_list = new_entity_list
-
-
-            # DESENHA BARRA DE VIDA DO PLAYER
             for ent in self.entity_list:
                 if ent.name == 'Player':
                     ent.draw_health_bar(self.window)
-
+                if ent.name == 'Boss':
+                    ent.draw_health_bar(self.window)
             for ent in self.entity_list:
-
                 if ent.name == 'Player' and ent.health <= 0:
-
                     ent.dead = True
-
                     while not ent.dead_animation_finished:
-
                         clock.tick(60)
-
                         self.window.fill((0, 0, 0))
-
                         for obj in self.entity_list:
-
                             if obj.name == 'Player':
                                 obj.animate_death()
-
                             self.window.blit(obj.surf, obj.rect)
-
                         pygame.display.flip()
-
                     font = pygame.font.SysFont("Arial", 80, bold=True)
-
                     text = font.render("GAME OVER", True, (255, 0, 0))
-
                     rect = text.get_rect(center=(400, 300))
-
                     self.window.blit(text, rect)
-
                     pygame.display.flip()
-
                     pygame.time.delay(3000)
                     conn = Database.connect()
-
                     cursor = conn.cursor()
-
                     cursor.execute(
                         "INSERT INTO score(points) VALUES(?)",
                         (self.score,)
                     )
-
                     conn.commit()
                     conn.close()
                     return
-
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 if event.type == EVENT_ENEMY:
-
                     if self.phase < 4:
                         choice = random.choice(
                             ('Lizard', 'Medusa', 'Demon')
                         )
-
                         self.entity_list.append(
                             EntityFactory.get_entity(choice)
                         )
@@ -280,21 +215,18 @@ class Level:
                 (0, 0, 0),
                 (640, 15, 160, 30)
             )
-
             self.level_text(
                 20,
                 f'Score: {self.score}',
                 COLOR_WHITE,
                 (650, 20)
             )
-
             self.level_text(
                 14,
                 f'{self.name} - Timeout: {self.timeout / 1000:.1f}s',
                 COLOR_WHITE,
                 (10, 5)
             )
-
             self.level_text(
                 14,
                 f'fps: {clock.get_fps():.0f}',

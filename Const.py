@@ -1,6 +1,6 @@
-# C
 import pygame
 
+# C
 COLOR_BLACK = (0, 0, 0)
 COLOR_RED = (255, 0, 0)
 COLOR_YELLOW = (255, 255, 0)
