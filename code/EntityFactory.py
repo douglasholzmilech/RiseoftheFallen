@@ -84,3 +84,6 @@ class EntityFactory:
                         )
 
                 return list_level4
+            case 'Boss':
+                from code.Boss import Boss
+                return Boss('Boss', (WIN_WIDTH + 200, 250))

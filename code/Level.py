@@ -103,6 +103,9 @@ class Level:
 
                 # desativa spawn de inimigos
                 pygame.time.set_timer(EVENT_ENEMY, 0)
+                self.entity_list.append(
+                    EntityFactory.get_entity('Boss')
+                )
             player = None
 
             for ent in self.entity_list:
