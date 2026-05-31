@@ -39,3 +39,33 @@ class EntityFactory:
                 return Enemy('Medusa', (WIN_WIDTH + 10, random.randint(250, 500)))
             case 'Demon':
                 return Enemy('Demon', (WIN_WIDTH + 10, random.randint(250, 500)))
+            case 'Level2bg':
+                list_level2 = []
+
+                for i in range(7):
+
+                    if i == 0:
+                        list_level2.append(
+                            Background(f'Level2bg{i}', (0, 0), speed=1)
+                        )
+                    else:
+                        list_level2.append(
+                            Background(f'Level2bg{i}', (0, 0), speed=0)
+                        )
+
+                return list_level2
+            case 'Level3bg':
+                list_level3 = []
+
+                for i in range(8):
+
+                    if i == 0:
+                        list_level3.append(
+                            Background(f'Level3bg{i}', (0, 0), speed=1)
+                        )
+                    else:
+                        list_level3.append(
+                            Background(f'Level3bg{i}', (0, 0), speed=0)
+                        )
+
+                return list_level3

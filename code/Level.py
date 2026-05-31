@@ -15,10 +15,11 @@ from code.EntityFactory import EntityFactory
 
 class Level:
     def __init__(self, window, name, game_mode):
-        self.timeout = 60000
+        self.timeout = 5000
         self.window = window
         self.name = name
         self.score = 0
+        self.phase = 1
         self.game_mode = game_mode
         self.entity_list: list[Entity] = []
         self.entity_list.extend(EntityFactory.get_entity('Level1bg'))
@@ -31,6 +32,52 @@ class Level:
         clock = pygame.time.Clock()
         while True:
             clock.tick(60)
+            self.timeout -= clock.get_time()
+            if self.timeout < 0:
+                self.timeout = 0
+            if self.phase == 1 and self.timeout <= 0:
+                self.phase = 2
+
+                self.name = 'Level2'
+
+                pygame.mixer_music.stop()
+                pygame.mixer_music.load('./asset/mapa2.wav')
+                pygame.mixer_music.play(-1)
+
+                self.timeout = 5000
+                # mantém apenas player
+                self.entity_list = [
+                    ent for ent in self.entity_list
+                    if ent.name == 'Player'
+                ]
+
+                # adiciona backgrounds da fase 2
+                self.entity_list = (
+                        EntityFactory.get_entity('Level2bg')
+                        + self.entity_list
+                )
+            if self.phase == 2 and self.timeout <= 0:
+                self.phase = 3
+
+                self.name = 'Level3'
+
+                pygame.mixer_music.stop()
+                pygame.mixer_music.load('./asset/mapa3.wav')
+                pygame.mixer_music.play(-1)
+
+                self.timeout = 5000
+
+                self.entity_list = [
+                    ent for ent in self.entity_list
+                    if ent.name == 'Player'
+                ]
+
+                self.entity_list = (
+                        EntityFactory.get_entity('Level3bg')
+                        + self.entity_list
+                )
+
+                pygame.time.set_timer(EVENT_ENEMY, 750)
             player = None
 
             for ent in self.entity_list:
@@ -108,7 +155,7 @@ class Level:
                     new_entity_list.append(ent)
 
                 # mantém backgrounds
-                elif 'Level1bg' in ent.name:
+                elif 'bg' in ent.name:
                     new_entity_list.append(ent)
 
                 # mantém inimigos vivos
