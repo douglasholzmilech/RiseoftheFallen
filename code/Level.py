@@ -91,8 +91,21 @@ class Level:
                 self.window.blit(source=ent.surf, dest=ent.rect)
                 if ent.name in ('Lizard', 'Medusa', 'Demon'):
                     ent.move(player)
-                elif ent.name == 'Boss':
+                elif ent.name == 'Fireball':
                     ent.move()
+                elif ent.name == 'Boss':
+                    ent.move(player)
+                    if ent.spawn_fireball:
+                        from code.Fireball import Fireball
+                        self.entity_list.append(
+                            Fireball(
+                                (
+                                    ent.rect.left,
+                                    ent.rect.centery
+                                )
+                            )
+                        )
+                        ent.spawn_fireball = False
                 else:
                     ent.move()
             for ent in self.entity_list:
@@ -109,6 +122,12 @@ class Level:
                         if ent.rect.colliderect(player.rect):
                             if not player.defending:
                                 player.health -= ent.damage
+            for ent in self.entity_list:
+                if ent.name == 'Fireball':
+                    if ent.rect.colliderect(player.rect):
+                        if not player.defending:
+                            player.health -= ent.damage
+                        ent.health = 0
             player = None
             for entity in self.entity_list:
                 if entity.name == 'Player':
@@ -135,6 +154,10 @@ class Level:
                 elif 'bg' in ent.name:
                     new_entity_list.append(ent)
                 elif hasattr(ent, 'health'):
+                    if ent.name == 'Fireball':
+                        if ent.health > 0:
+                            new_entity_list.append(ent)
+                        continue
                     if ent.name == 'Boss' and ent.health <= 0:
                         font = pygame.font.SysFont(
                             "Arial",
