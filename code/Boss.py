@@ -118,14 +118,24 @@ class Boss(Entity):
             self.animate_death()
             return
         if player:
-            if player.rect.centerx < self.rect.centerx:
-                self.rect.centerx -= self.speed
-            elif player.rect.centerx > self.rect.centerx:
-                self.rect.centerx += self.speed
-            if player.rect.centery < self.rect.centery:
-                self.rect.centery -= self.speed
-            elif player.rect.centery > self.rect.centery:
-                self.rect.centery += self.speed
+            distance_x = abs(
+                player.rect.centerx -
+                self.rect.centerx
+            )
+            distance_y = abs(
+                player.rect.centery -
+                self.rect.centery
+            )
+            if distance_x > 250:
+                if player.rect.centerx < self.rect.centerx:
+                    self.rect.centerx -= self.speed
+                else:
+                    self.rect.centerx += self.speed
+            if distance_y > 50:
+                if player.rect.centery < self.rect.centery:
+                    self.rect.centery -= self.speed
+                else:
+                    self.rect.centery += self.speed
             self.attack_timer -= 1
             if self.attack_timer <= 0:
                 self.attacking = True
