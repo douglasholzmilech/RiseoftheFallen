@@ -28,6 +28,7 @@ class Level:
         pygame.mixer_music.play(-1)
         clock = pygame.time.Clock()
         while True:
+            new_fireballs = []
             clock.tick(60)
             self.timeout -= clock.get_time()
             if self.timeout < 0:
@@ -97,7 +98,7 @@ class Level:
                     ent.move(player)
                     if ent.spawn_fireball:
                         from code.Fireball import Fireball
-                        self.entity_list.append(
+                        new_fireballs.append(
                             Fireball(
                                 (
                                     ent.rect.left,
@@ -158,24 +159,9 @@ class Level:
                         if ent.health > 0:
                             new_entity_list.append(ent)
                         continue
-                    if ent.name == 'Boss' and ent.health <= 0:
-                        font = pygame.font.SysFont(
-                            "Arial",
-                            80,
-                            bold=True
-                        )
-                        text = font.render(
-                            "YOU WIN",
-                            True,
-                            (0, 255, 0)
-                        )
-                        rect = text.get_rect(
-                            center=(400, 300)
-                        )
-                        self.window.blit(text, rect)
-                        pygame.display.flip()
-                        pygame.time.delay(5000)
-                        return
+                    if ent.name == 'Boss':
+                        new_entity_list.append(ent)
+                        continue
                     if ent.health > 0:
                         new_entity_list.append(ent)
                     else:
@@ -186,11 +172,48 @@ class Level:
                         elif ent.name == 'Demon':
                             self.score += 30
             self.entity_list = new_entity_list
+            self.entity_list.extend(new_fireballs)
             for ent in self.entity_list:
                 if ent.name == 'Player':
                     ent.draw_health_bar(self.window)
                 if ent.name == 'Boss':
                     ent.draw_health_bar(self.window)
+            boss = None
+            for ent in self.entity_list:
+                if ent.name == 'Boss':
+                    boss = ent
+                    break
+            if boss:
+                if boss.health <= 0:
+                    boss.dead = True
+
+                if boss.dead_animation_finished:
+                    self.score += 1000
+                    conn = Database.connect()
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "INSERT INTO score(points) VALUES(?)",
+                        (self.score,)
+                    )
+                    conn.commit()
+                    conn.close()
+                    font = pygame.font.SysFont(
+                        "Arial",
+                        80,
+                        bold=True
+                    )
+                    text = font.render(
+                        "YOU WIN",
+                        True,
+                        (0, 255, 0)
+                    )
+                    rect = text.get_rect(
+                        center=(400, 300)
+                    )
+                    self.window.blit(text, rect)
+                    pygame.display.flip()
+                    pygame.time.delay(5000)
+                    return
             for ent in self.entity_list:
                 if ent.name == 'Player' and ent.health <= 0:
                     ent.dead = True

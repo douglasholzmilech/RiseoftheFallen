@@ -85,7 +85,7 @@ class Boss(Entity):
         self.attack_speed = 0.15
         self.dead = False
         self.dead_counter = 0
-        self.dead_speed = 0.15
+        self.dead_speed = 0.40
         self.dead_animation_finished = False
         self.attack_timer = 180
         self.state = 'walk'
@@ -118,24 +118,26 @@ class Boss(Entity):
             self.animate_death()
             return
         if player:
-            distance_x = abs(
-                player.rect.centerx -
-                self.rect.centerx
-            )
-            distance_y = abs(
-                player.rect.centery -
-                self.rect.centery
-            )
-            if distance_x > 250:
-                if player.rect.centerx < self.rect.centerx:
+            distance_x = player.rect.centerx - self.rect.centerx
+            distance_y = player.rect.centery - self.rect.centery
+            min_distance = 70
+            max_distance = 180
+
+            if abs(distance_x) < min_distance:
+                if distance_x < 0:
+                    self.rect.centerx += 1
+                else:
+                    self.rect.centerx -= 1
+            elif abs(distance_x) > max_distance:
+                if distance_x < 0:
                     self.rect.centerx -= self.speed
                 else:
                     self.rect.centerx += self.speed
-            if distance_y > 50:
-                if player.rect.centery < self.rect.centery:
-                    self.rect.centery -= self.speed
+            if abs(distance_y) > 30:
+                if distance_y < 0:
+                    self.rect.centery -= 1
                 else:
-                    self.rect.centery += self.speed
+                    self.rect.centery += 1
             self.attack_timer -= 1
             if self.attack_timer <= 0:
                 self.attacking = True
@@ -161,8 +163,9 @@ class Boss(Entity):
             (255, 0, 0),
             (300, 20, 300, 20)
         )
+        health = max(0, self.health)
         width = (
-                        self.health /
+                        health /
                         self.max_health
                 ) * 300
         pygame.draw.rect(

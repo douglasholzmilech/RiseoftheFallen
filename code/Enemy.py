@@ -56,8 +56,8 @@ class Enemy(Entity):
             left=position[0],
             top=position[1]
         )
-        self.max_health = 30
-        self.health = 30
+        self.max_health = 10
+        self.health = 10
 
     def animate(self):
         self.animation_counter += self.animation_speed
