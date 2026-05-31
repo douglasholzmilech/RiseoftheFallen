@@ -78,6 +78,31 @@ class Level:
                 )
 
                 pygame.time.set_timer(EVENT_ENEMY, 750)
+            if self.phase == 3 and self.timeout <= 0:
+                self.phase = 4
+
+                self.name = 'Level4'
+
+                pygame.mixer_music.stop()
+                pygame.mixer_music.load('./asset/mapa4.wav')
+                pygame.mixer_music.play(-1)
+
+                self.timeout = 60000
+
+                # mantém apenas player
+                self.entity_list = [
+                    ent for ent in self.entity_list
+                    if ent.name == 'Player'
+                ]
+
+                # adiciona backgrounds da fase 4
+                self.entity_list = (
+                        EntityFactory.get_entity('Level4bg')
+                        + self.entity_list
+                )
+
+                # desativa spawn de inimigos
+                pygame.time.set_timer(EVENT_ENEMY, 0)
             player = None
 
             for ent in self.entity_list:
@@ -235,8 +260,15 @@ class Level:
                     pygame.quit()
                     sys.exit()
                 if event.type == EVENT_ENEMY:
-                    choice = random.choice(('Lizard', 'Medusa', 'Demon'))
-                    self.entity_list.append(EntityFactory.get_entity(choice))
+
+                    if self.phase < 4:
+                        choice = random.choice(
+                            ('Lizard', 'Medusa', 'Demon')
+                        )
+
+                        self.entity_list.append(
+                            EntityFactory.get_entity(choice)
+                        )
 
             self.level_text(14, f'{self.name} - Timeout: {self.timeout / 1000:.1f}s', COLOR_WHITE, (10, 5))
             self.level_text(14, f'fps: {clock.get_fps():.0f}', COLOR_WHITE, (10, WIN_HEIGHT - 35))

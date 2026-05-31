@@ -69,3 +69,18 @@ class EntityFactory:
                         )
 
                 return list_level3
+            case 'Level4bg':
+                list_level4 = []
+
+                for i in range(8):
+
+                    if i == 0:
+                        list_level4.append(
+                            Background(f'Level4bg{i}', (0, 0), speed=1)
+                        )
+                    else:
+                        list_level4.append(
+                            Background(f'Level4bg{i}', (0, 0), speed=0)
+                        )
+
+                return list_level4
