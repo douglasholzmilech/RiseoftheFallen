@@ -19,6 +19,19 @@ class Menu:
             self.menu_text(50, "Rise", text_color=COLOR_BLACK, text_center_pos=((WIN_WIDTH / 2), 70))
             self.menu_text(50, "of the", text_color=COLOR_BLACK, text_center_pos=((WIN_WIDTH / 2), 120))
             self.menu_text(50, "Fallen", text_color=COLOR_BLACK, text_center_pos=((WIN_WIDTH / 2), 170))
+            self.menu_text(16, "COMO JOGAR", COLOR_BLACK, (720, 50))
+            self.menu_text(12, "SETAS - MOVIMENTO", COLOR_BLACK, (720, 75))
+            self.menu_text(12, "NUMPAD 1 - ATAQUE 1", COLOR_BLACK, (720, 95))
+            self.menu_text(12, "NUMPAD 2 - ATAQUE 2", COLOR_BLACK, (720, 115))
+            self.menu_text(12, "NUMPAD 0 - DEFESA", COLOR_BLACK, (720, 135))
+            self.menu_text(12, "ENTER - SELECIONAR", COLOR_BLACK, (720, 155))
+            self.menu_text(12, "ESC - SAI DA TELA SCORE", COLOR_BLACK, (720, 175))
+            self.menu_text(
+                14,
+                "Desenvolvedor: Douglas H. Milech",
+                text_color=COLOR_BLACK,
+                text_center_pos=(120, 580)
+            )
             for i in range(len(MENU_OPTION)):
                 if i == menu_option:
                     self.menu_text(20, MENU_OPTION[i], text_color=COLOR_YELLOW,

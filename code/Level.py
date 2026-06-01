@@ -11,7 +11,7 @@ from code.EntityFactory import EntityFactory
 
 class Level:
     def __init__(self, window, name, game_mode):
-        self.timeout = 5000
+        self.timeout = 30000
         self.window = window
         self.name = name
         self.score = 0
@@ -39,7 +39,7 @@ class Level:
                 pygame.mixer_music.stop()
                 pygame.mixer_music.load('./asset/mapa2.wav')
                 pygame.mixer_music.play(-1)
-                self.timeout = 5000
+                self.timeout = 30000
                 self.entity_list = [
                     ent for ent in self.entity_list
                     if ent.name == 'Player'
@@ -54,7 +54,7 @@ class Level:
                 pygame.mixer_music.stop()
                 pygame.mixer_music.load('./asset/mapa3.wav')
                 pygame.mixer_music.play(-1)
-                self.timeout = 5000
+                self.timeout = 30000
                 self.entity_list = [
                     ent for ent in self.entity_list
                     if ent.name == 'Player'
